@@ -299,8 +299,8 @@
             <tbody>
                 @foreach (var subtotal in subtotals)
                 {
-                var feeAmount = Math.Max(Math.Round(subtotal.Total * subtotal.Agent.Settings.CommissionFeePercent, 2), 0);
-                feeTotal += feeAmount;
+                    var feeAmount = Math.Max(Math.Round(subtotal.Total * subtotal.Agent.Settings.CommissionFeePercent, 2), 0);
+                    feeTotal += feeAmount;
                     var agentAmount = Math.Max(subtotal.Total - feeAmount, 0);
 
                     <tr>

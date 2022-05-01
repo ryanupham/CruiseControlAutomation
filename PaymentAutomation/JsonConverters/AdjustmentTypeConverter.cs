@@ -12,8 +12,6 @@ internal class AdjustmentTypeConverter : JsonConverter<AdjustmentType>
         return AdjustmentType.FromValue(description);
     }
 
-    public override void Write(Utf8JsonWriter writer, AdjustmentType value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, AdjustmentType value, JsonSerializerOptions options) =>
         throw new NotImplementedException();
-    }
 }

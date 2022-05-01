@@ -16,8 +16,6 @@ internal class DateOnlyConverter : JsonConverter<DateOnly>
         return DateOnly.FromDateTime(dateTimeOffset.Date);
     }
 
-    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options) =>
         throw new NotImplementedException();
-    }
 }

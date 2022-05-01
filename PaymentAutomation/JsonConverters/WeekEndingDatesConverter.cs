@@ -26,10 +26,8 @@ internal class WeekEndingDatesConverter : JsonConverter<IReadOnlyCollection<Date
         return dates.AsReadOnly();
     }
 
-    public override void Write(Utf8JsonWriter writer, IReadOnlyCollection<DateOnly> value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, IReadOnlyCollection<DateOnly> value, JsonSerializerOptions options) =>
         throw new NotImplementedException();
-    }
 
     private static DateOnly GetNextDate(ref Utf8JsonReader reader)
     {

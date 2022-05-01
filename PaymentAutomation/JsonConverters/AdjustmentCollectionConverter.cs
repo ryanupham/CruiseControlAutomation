@@ -19,7 +19,7 @@ internal class AdjustmentCollectionConverter : JsonConverter<IReadOnlyCollection
         if (
             reader.TokenType != JsonTokenType.StartObject ||
             !reader.Read()
-        ) throw new JsonException();
+        ) return false;
 
         do
         {
@@ -56,8 +56,6 @@ internal class AdjustmentCollectionConverter : JsonConverter<IReadOnlyCollection
         return true;
     }
 
-    public override void Write(Utf8JsonWriter writer, IReadOnlyCollection<Adjustment> value, JsonSerializerOptions options)
-    {
+    public override void Write(Utf8JsonWriter writer, IReadOnlyCollection<Adjustment> value, JsonSerializerOptions options) =>
         throw new NotImplementedException();
-    }
 }
