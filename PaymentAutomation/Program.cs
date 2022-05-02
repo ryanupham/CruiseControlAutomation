@@ -34,12 +34,12 @@ public class Program
         }
         catch (JsonException e)
         {
-            Console.WriteLine($"Error: {e.Message}");
+            Console.WriteLine($"\n\nError: {e.Message}");
             Console.WriteLine("Please ensure you are logged in to Cruise Control");
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error: {e.Message}");
+            Console.WriteLine($"\n\nError: {e.Message}");
         }
 
         Console.ReadKey();
