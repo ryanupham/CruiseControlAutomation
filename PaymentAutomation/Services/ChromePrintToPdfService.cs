@@ -31,3 +31,8 @@ internal class ChromePrintToPdfService : IPrintToPdfService
         Directory.CreateDirectory(directory);
     }
 }
+
+internal class NullPrintToPdfService : IPrintToPdfService
+{
+    public void PrintToPdf(string htmlFilePath, string outFilePath) { }
+}

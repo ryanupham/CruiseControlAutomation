@@ -77,8 +77,8 @@ public class Program
             .AddRazorEngine()
             .AddAgentRolloverRepository()
             .AddReportingApiClient(appSettings)
+            .AddPrintToPdfService(appSettings)
             .AddHttpClient()
-            .AddSingleton<IPrintToPdfService>(new ChromePrintToPdfService(appSettings.ChromePath))
             .AddSingleton<IPayrollServiceFactory, PayrollServiceFactory>()
             .AddSingleton(
                 sp => sp.GetRequiredService<IPayrollServiceFactory>().GetService()

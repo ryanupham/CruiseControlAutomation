@@ -52,4 +52,11 @@ internal static class ServiceCollectionExtensions
 
         return services.AddSingleton<IRepository<(DateOnly weekEndingDate, string agentId), decimal>>(agentRolloverRepository);
     }
+
+    public static IServiceCollection AddPrintToPdfService(this IServiceCollection services, AppSettings appSettings) =>
+        services.AddSingleton<IPrintToPdfService>(
+            Environment.GetCommandLineArgs().Contains("--dry-run")
+                ? new NullPrintToPdfService()
+                : new ChromePrintToPdfService(appSettings.ChromePath)
+        );
 }
