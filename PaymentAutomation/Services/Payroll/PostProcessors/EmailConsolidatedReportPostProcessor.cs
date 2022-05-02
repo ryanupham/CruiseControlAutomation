@@ -35,6 +35,23 @@ internal class EmailConsolidatedReportPostProcessor : IPayrollPostProcessor
 
     public void Process(string filepath, DateOnly weekEndingDate, Agent? agent)
     {
+        Console.WriteLine($"\nEmailing consolidated report to {toName} at {toEmail}");
+        SendEmail(filepath, weekEndingDate);
+    }
+
+    private void SendEmail(string filepath, DateOnly weekEndingDate)
+    {
+        var mailMessage = CreateMailMessage(filepath, weekEndingDate);
+
+        using var smtpClient = new SmtpClient();
+        smtpClient.Connect(emailSettings.Server, emailSettings.Port, true);
+        smtpClient.Authenticate(emailSettings.Username, emailSettings.Password);
+        smtpClient.Send(mailMessage);
+        smtpClient.Disconnect(true);
+    }
+
+    private MimeMessage CreateMailMessage(string filepath, DateOnly weekEndingDate)
+    {
         var mailMessage = new MimeMessage();
         mailMessage.From.Add(new MailboxAddress(fromName, fromEmail));
         mailMessage.To.Add(new MailboxAddress(toName, toEmail));
@@ -62,11 +79,6 @@ internal class EmailConsolidatedReportPostProcessor : IPayrollPostProcessor
             textBody,
             attachment,
         };
-
-        using var smtpClient = new SmtpClient();
-        smtpClient.Connect(emailSettings.Server, emailSettings.Port, true);
-        smtpClient.Authenticate(emailSettings.Username, emailSettings.Password);
-        smtpClient.Send(mailMessage);
-        smtpClient.Disconnect(true);
+        return mailMessage;
     }
 }

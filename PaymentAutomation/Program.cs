@@ -28,17 +28,23 @@ public class Program
 
         try
         {
-            var generateReportsTask = program.GenerateReports();
-            await DisplayProcessingMessage(generateReportsTask);
+            var weekEndingDate = await program.GetUserSelectedWeekEndingDate();
+
+            Console.WriteLine("\n\nProcessing...");
+            await program.GenerateReports(weekEndingDate);
             Console.WriteLine("\n\nFinished.");
         }
         catch (JsonException e)
         {
+            Console.WriteLine($"\n\n{e}");  // TODO: log file
+
             Console.WriteLine($"\n\nError: {e.Message}");
             Console.WriteLine("Please ensure you are logged in to Cruise Control");
         }
         catch (Exception e)
         {
+            Console.WriteLine($"\n\n{e}");  // TODO: log file
+
             Console.WriteLine($"\n\nError: {e.Message}");
         }
 
@@ -100,20 +106,6 @@ public class Program
         return optionSelector.GetSelectedOption();
     }
 
-    private async Task GenerateReports()
-    {
-        var weekEndingDate = await GetUserSelectedWeekEndingDate();
+    private async Task GenerateReports(DateOnly weekEndingDate) =>
         await payrollService.GenerateReportsForWeekEnding(weekEndingDate);
-    }
-
-    private static async Task DisplayProcessingMessage(Task task)
-    {
-        Console.WriteLine("\nProcessing");
-
-        while (!task.IsCompleted)
-        {
-            Console.Write(".");
-            await task.WaitAsync(TimeSpan.FromMilliseconds(750));
-        }
-    }
 }
