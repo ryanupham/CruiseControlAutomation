@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace PaymentAutomation.Services;
 
-internal interface IReportingApiClient
+public interface IReportingApiClient
 {
     Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)> GetBookingsAndAdjustmentsForWeekEnding(DateOnly weekEndingDate);
     Task<IReadOnlyCollection<DateOnly>> GetWeekEndingDates();
@@ -66,8 +66,6 @@ internal class ReportingApiClient : IReportingApiClient
         var response = await httpClient.PostAsJsonAsync("/rpe-api/report/getCommTrackingHistoryDetailReport", payload);
         var result = await response.Content.ReadAsStringAsync();
 
-
-
         //var apiResponsesRaw = File.ReadAllText("apiResponses.json");
         //var apiResponses = JsonSerializer.Deserialize<Dictionary<string, string>>(apiResponsesRaw)!;
 
@@ -81,12 +79,12 @@ internal class ReportingApiClient : IReportingApiClient
         var serializerOptions = new JsonSerializerOptions
         {
             Converters = 
-                {
-                    new BookingCollectionConverter(),
-                    new AdjustmentCollectionConverter(),
-                    new AdjustmentTypeConverter(),
-                    new DateOnlyConverter(),
-                }
+            {
+                new BookingCollectionConverter(),
+                new AdjustmentCollectionConverter(),
+                new AdjustmentTypeConverter(),
+                new DateOnlyConverter(),
+            }
         };
 
         var commissionReport = JsonSerializer.Deserialize<CommissionReport>(result, serializerOptions)!;
