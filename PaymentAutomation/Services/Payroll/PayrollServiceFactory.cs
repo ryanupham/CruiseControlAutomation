@@ -39,7 +39,10 @@ namespace PaymentAutomation.Services.Payroll
             var agentPostProcessors = new List<IPayrollPostProcessor>();
 
             var isDryRun = Environment.GetCommandLineArgs().Contains("--dry-run");
-            if (!isDryRun)
+            var isNoEmail = Environment.GetCommandLineArgs().Contains("--no-email");
+            var shouldEmail = !(isDryRun || isNoEmail);
+
+            if (shouldEmail)
             {
                 consolidatedPostProcessors.AddRange(new List<IPayrollPostProcessor>
                 {

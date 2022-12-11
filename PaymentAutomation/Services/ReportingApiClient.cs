@@ -20,12 +20,6 @@ internal class ReportingApiClient : IReportingApiClient
     private readonly CruiseControlCookies cruiseControlCookies;
     private readonly IAgentSettingsProvider agentSettingsProvider;
 
-    private readonly Lazy<Dictionary<string, string>> apiResponses = new(() =>
-    {
-        var apiResponsesRaw = File.ReadAllText("apiResponses.json");
-        return JsonSerializer.Deserialize<Dictionary<string, string>>(apiResponsesRaw)!;
-    });
-
     public ReportingApiClient(
         Uri baseAddress,
         long agencyId,
@@ -49,36 +43,11 @@ internal class ReportingApiClient : IReportingApiClient
             return await booking;
         }
 
-        var payload = new
-        {
-            agentIds = new List<int>(),
-            weekEndingDates = new List<string> { weekEndingDate.ToString() },
-            fileType = "On-Screen View",
-            reportType = "detail",
-            reportPeriod = "commissionHistory",
-            bcAgencyId = agencyId,
-            caseId = "",
-            payrollYear = null as object,
-        };
-
-        var httpClient = GetHttpClientWithAuthorization();
-
-        var response = await httpClient.PostAsJsonAsync("/rpe-api/report/getCommTrackingHistoryDetailReport", payload);
-        var result = await response.Content.ReadAsStringAsync();
-
-        //var apiResponsesRaw = File.ReadAllText("apiResponses.json");
-        //var apiResponses = JsonSerializer.Deserialize<Dictionary<string, string>>(apiResponsesRaw)!;
-
-        //apiResponses[weekEndingDate.ToString()] = result;
-        //var serializedApiResponses = JsonSerializer.Serialize(apiResponses);
-
-        //File.WriteAllText("apiResponses.json", serializedApiResponses);
-
-        //var result = apiResponses.Value[weekEndingDate.ToString()];
+        var commissionReportApiResponse = await GetCommissionReportApiResponse(weekEndingDate);
 
         var serializerOptions = new JsonSerializerOptions
         {
-            Converters = 
+            Converters =
             {
                 new BookingCollectionConverter(),
                 new AdjustmentCollectionConverter(),
@@ -87,7 +56,8 @@ internal class ReportingApiClient : IReportingApiClient
             }
         };
 
-        var commissionReport = JsonSerializer.Deserialize<CommissionReport>(result, serializerOptions)!;
+        var commissionReport = JsonSerializer.Deserialize<CommissionReport>(
+            commissionReportApiResponse, serializerOptions)!;
         if (!commissionReport.IsValid) throw new InvalidDataException("Data marked invalid");
 
         commissionReport = commissionReport with
@@ -113,6 +83,35 @@ internal class ReportingApiClient : IReportingApiClient
         };
 
         return (commissionReport.Bookings, commissionReport.Adjustments);
+    }
+
+    private readonly Dictionary<string, string> apiResponses = new();
+    private async Task<string> GetCommissionReportApiResponse(DateOnly weekEndingDate)
+    {
+        var payload = new
+        {
+            agentIds = new List<int>(),
+            weekEndingDates = new List<string> { weekEndingDate.ToString() },
+            fileType = "On-Screen View",
+            reportType = "detail",
+            reportPeriod = "commissionHistory",
+            bcAgencyId = agencyId,
+            caseId = "",
+            payrollYear = null as object,
+        };
+
+        var httpClient = GetHttpClientWithAuthorization();
+
+        if (!apiResponses.ContainsKey(weekEndingDate.ToString()))
+        {
+            var response = await httpClient.PostAsJsonAsync(
+                "/rpe-api/report/getCommTrackingHistoryDetailReport",
+                payload
+            );
+            apiResponses[weekEndingDate.ToString()] = await response.Content.ReadAsStringAsync();
+        }
+
+        return apiResponses[weekEndingDate.ToString()];
     }
 
     private Lazy<Task<IReadOnlyCollection<DateOnly>>>? _getWeekEndingDates;

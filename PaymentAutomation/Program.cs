@@ -33,6 +33,13 @@ public class Program
             Console.WriteLine("\n\nProcessing...");
             await program.GenerateReports(weekEndingDate);
             Console.WriteLine("\n\nFinished.");
+
+            //var weekEndingDates = await program.GetWeekEndingDates();
+            //foreach (var weekEndingDate in weekEndingDates.Where(d => d > new DateOnly(2022, 8, 22)).OrderBy(d => d))
+            //{
+            //    Console.WriteLine($"Week {weekEndingDate}...");
+            //    await program.GenerateReports(weekEndingDate);
+            //}
         }
         catch (JsonException e)
         {

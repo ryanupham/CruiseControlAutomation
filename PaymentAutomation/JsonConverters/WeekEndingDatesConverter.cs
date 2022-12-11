@@ -39,11 +39,13 @@ internal class WeekEndingDatesConverter : JsonConverter<IReadOnlyCollection<Date
 
         var result = DateOnly.MinValue;
 
-        foreach (var _ in Enumerable.Range(0, 2))
+        foreach (var _ in Enumerable.Range(0, 4))
         {
             var isValid = reader.GetString() switch
             {
                 "weekEndingDate" => TryParseDate(ref reader, out result),
+                "canBePosted" => TryParseBool(ref reader, out var _),
+                "displayReport" => TryParseBool(ref reader, out var _),
                 "valid" => TryParseValid(ref reader),
                 _ => throw new JsonException()
             };
@@ -54,11 +56,6 @@ internal class WeekEndingDatesConverter : JsonConverter<IReadOnlyCollection<Date
         return result;
     }
 
-    private static bool TryParseValid(ref Utf8JsonReader reader) =>
-        reader.TokenType == JsonTokenType.PropertyName &&
-            reader.Read() &&
-            reader.GetBoolean();
-
     private static bool TryParseDate(ref Utf8JsonReader reader, out DateOnly result)
     {
         result = DateOnly.MinValue;
@@ -67,4 +64,23 @@ internal class WeekEndingDatesConverter : JsonConverter<IReadOnlyCollection<Date
         var dateString = reader.GetString();
         return DateOnly.TryParse(dateString, out result);
     }
+
+    private static bool TryParseBool(ref Utf8JsonReader reader, out bool result)
+    {
+        result = false;
+
+        if (
+            reader.TokenType != JsonTokenType.PropertyName ||
+            !reader.Read() ||
+            (reader.TokenType != JsonTokenType.False && reader.TokenType != JsonTokenType.True)
+        ) return false;
+        
+        result = reader.GetBoolean();
+        return true;
+    }
+
+    private static bool TryParseValid(ref Utf8JsonReader reader) =>
+        reader.TokenType == JsonTokenType.PropertyName &&
+            reader.Read() &&
+            reader.GetBoolean();
 }
