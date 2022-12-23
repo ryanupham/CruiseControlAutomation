@@ -35,7 +35,7 @@ public class Program
             Console.WriteLine("\n\nFinished.");
 
             //var weekEndingDates = await program.GetWeekEndingDates();
-            //foreach (var weekEndingDate in weekEndingDates.Where(d => d > new DateOnly(2022, 8, 22)).OrderBy(d => d))
+            //foreach (var weekEndingDate in weekEndingDates).OrderBy(d => d))
             //{
             //    Console.WriteLine($"Week {weekEndingDate}...");
             //    await program.GenerateReports(weekEndingDate);

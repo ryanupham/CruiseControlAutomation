@@ -1,4 +1,5 @@
 ﻿using PaymentAutomation.Enums;
+using PaymentAutomation.JsonConverters;
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
@@ -28,4 +29,6 @@ public record Adjustment
     public decimal CommissionTotalAmount { get; init; }
     [JsonPropertyName("totalFranchiseAmt")]
     public decimal CommissionFranchiseAmount { get; init; }
+    [JsonPropertyName("valid")]
+    public bool Valid { get; init; }
 }

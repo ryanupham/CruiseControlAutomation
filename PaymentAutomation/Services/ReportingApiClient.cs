@@ -1,5 +1,6 @@
 ﻿using PaymentAutomation.JsonConverters;
 using PaymentAutomation.Models;
+using PaymentAutomation.Models.ApiResponses;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -43,22 +44,42 @@ internal class ReportingApiClient : IReportingApiClient
             return await booking;
         }
 
-        var commissionReportApiResponse = await GetCommissionReportApiResponse(weekEndingDate);
+        var commissionReportApiResponseRaw = await GetCommissionReportApiResponse(weekEndingDate);
 
         var serializerOptions = new JsonSerializerOptions
         {
             Converters =
             {
-                new BookingCollectionConverter(),
-                new AdjustmentCollectionConverter(),
-                new AdjustmentTypeConverter(),
                 new DateOnlyConverter(),
+                new BookingConverter(),
+                new AdjustmentTypeConverter(),
+                new AdjustmentConverter(),
             }
         };
 
-        var commissionReport = JsonSerializer.Deserialize<CommissionReport>(
-            commissionReportApiResponse, serializerOptions)!;
-        if (!commissionReport.IsValid) throw new InvalidDataException("Data marked invalid");
+        var commissionReportApiResponse = JsonSerializer.Deserialize<CommissionDetailReportResponse>(commissionReportApiResponseRaw, serializerOptions)
+            ?? throw new InvalidDataException("Commission report could not be loaded");
+        if (!commissionReportApiResponse.Valid) throw new InvalidDataException("Commission report is marked invalid");
+
+        var allBookings =
+            from bookingGroup in commissionReportApiResponse.ConeCommisonTrackingHistoryDetailDtos.Values
+            from companyBookingGroup in bookingGroup.Values
+            from numberedBookingGroup in companyBookingGroup.Values
+            from bookingRecord in numberedBookingGroup
+            where bookingRecord.Valid
+            select bookingRecord;
+        var allAdjustments =
+            from adjustmentGroup in commissionReportApiResponse.AdjustmentAmountsDtos.Values
+            from adjustmentRecord in adjustmentGroup
+            where adjustmentRecord.Valid
+            select adjustmentRecord;
+
+        var commissionReport = new CommissionReport
+        {
+            Bookings = allBookings.ToList(),
+            Adjustments = allAdjustments.ToList(),
+            Valid = commissionReportApiResponse.Valid
+        };
 
         commissionReport = commissionReport with
         {
@@ -126,10 +147,16 @@ internal class ReportingApiClient : IReportingApiClient
 
             var serializerOptions = new JsonSerializerOptions
             {
-                Converters = { new WeekEndingDatesConverter() }
+                Converters = { new DateOnlyConverter() }
             };
 
-            return JsonSerializer.Deserialize<IReadOnlyCollection<DateOnly>>(result, serializerOptions)!;
+            var weekEndingDates = JsonSerializer.Deserialize<IEnumerable<WeekEndingDate>>(result, serializerOptions)
+                ?? throw new InvalidDataException("Week ending dates could not be loaded");
+
+            return weekEndingDates
+                .Where(d => d.Valid)
+                .Select(d => d.Date)
+                .ToList();
         });
 
         return await _getWeekEndingDates.Value;

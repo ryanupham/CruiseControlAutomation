@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using PaymentAutomation.JsonConverters;
+using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
 
@@ -35,4 +36,6 @@ public record Booking
     public decimal FranchisePayable { get; init; }
     [JsonPropertyName("franchiseDueAmt")]
     public decimal FranchiseDueAmount { get; init; }
+    [JsonPropertyName("valid")]
+    public bool Valid { get; init; }
 }

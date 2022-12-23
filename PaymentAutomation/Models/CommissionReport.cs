@@ -9,5 +9,5 @@ internal record CommissionReport
     [JsonPropertyName("adjustmentAmountsDtos")]
     public IReadOnlyCollection<Adjustment> Adjustments { get; init; } = new List<Adjustment>();
     [JsonPropertyName("valid")]
-    public bool IsValid { get; init; }
+    public bool Valid { get; init; }
 }
