@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using PaymentAutomation.DataAccess;
 using PaymentAutomation.Models;
+using PaymentAutomation.Services.Payroll;
 using PaymentAutomation.Utilities;
 using RazorLight;
 
@@ -59,4 +61,41 @@ internal static class ServiceCollectionExtensions
                 ? new NullPrintToPdfService()
                 : new ChromePrintToPdfService(appSettings.ChromePath)
         );
+
+    public static IServiceCollection AddPayrollService(this IServiceCollection services, AppSettings appSettings)
+    {
+        var manager = appSettings.Agents.Values.Single(a => a.IsManager)!;
+        
+        var isDryRun = Environment.GetCommandLineArgs().Contains("--dry-run");
+        var isNoEmail = Environment.GetCommandLineArgs().Contains("--no-email");
+        var shouldEmail = !(isDryRun || isNoEmail);
+
+        if (shouldEmail)
+        {
+            services
+                .AddSingleton<IPayrollPostProcessor>(
+                    new CopyConsolidatedFilePostProcessor(appSettings.OutputFolder)
+                ).AddSingleton<IPayrollPostProcessor>(
+                    new EmailConsolidatedReportPostProcessor(
+                        appSettings.Email,
+                        manager.Name,
+                        manager.Email,
+                        manager.Name,
+                        manager.Email
+                    )
+                ).AddSingleton<IPayrollPostProcessor>(
+                    new CopyAgentFilePostProcessor(appSettings.OutputFolder)
+                ).AddSingleton<IPayrollPostProcessor>(
+                    new EmailAgentReportPostProcessor(
+                        appSettings.Email,
+                        manager.Name,
+                        manager.Email,
+                        manager.Name,
+                        manager.Email
+                    )
+                );
+        }
+
+        return services.AddSingleton<IPayrollService, PayrollService>();
+    }
 }

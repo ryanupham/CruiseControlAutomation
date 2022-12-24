@@ -33,10 +33,12 @@ internal class EmailConsolidatedReportPostProcessor : IPayrollPostProcessor
         this.ccEmail = ccEmail;
     }
 
-    public void Process(string filepath, DateOnly weekEndingDate, Agent? agent)
+    public void Process(ReportMetadata reportMetadata)
     {
+        if (reportMetadata.ReportType is not ReportType.Consolidated) return;
+
         Console.WriteLine($"\nEmailing consolidated report to {toName} at {toEmail}");
-        SendEmail(filepath, weekEndingDate);
+        SendEmail(reportMetadata.Filepath, reportMetadata.WeekEndingDate);
     }
 
     private void SendEmail(string filepath, DateOnly weekEndingDate)

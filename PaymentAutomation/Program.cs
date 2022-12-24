@@ -86,10 +86,7 @@ public class Program
             .AddReportingApiClient(appSettings)
             .AddPrintToPdfService(appSettings)
             .AddHttpClient()
-            .AddSingleton<IPayrollServiceFactory, PayrollServiceFactory>()
-            .AddSingleton(
-                sp => sp.GetRequiredService<IPayrollServiceFactory>().GetService()
-            )
+            .AddPayrollService(appSettings)
             .AddSingleton<IRolloverService, RolloverService>()
             .AddSingleton<Program>()
             .BuildServiceProvider();

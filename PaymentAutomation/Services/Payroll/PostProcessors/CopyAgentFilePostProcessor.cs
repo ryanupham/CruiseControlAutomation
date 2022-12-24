@@ -1,6 +1,4 @@
-﻿using PaymentAutomation.Models;
-
-namespace PaymentAutomation.Services.Payroll;
+﻿namespace PaymentAutomation.Services.Payroll;
 
 internal class CopyAgentFilePostProcessor : IPayrollPostProcessor
 {
@@ -9,13 +7,15 @@ internal class CopyAgentFilePostProcessor : IPayrollPostProcessor
     public CopyAgentFilePostProcessor(string outputFolder) =>
         this.outputFolder = outputFolder;
 
-    public void Process(string filepath, DateOnly weekEndingDate, Agent? agent)
+    public void Process(ReportMetadata reportMetadata)
     {
-        var filename = Path.GetFileName(filepath);
-        var destinationFilepath = Path.Combine(outputFolder, agent?.FullName ?? "", filename);
+        if (reportMetadata.ReportType is not ReportType.Agent) return;
+
+        var filename = Path.GetFileName(reportMetadata.Filepath);
+        var destinationFilepath = Path.Combine(outputFolder, reportMetadata.Agent?.FullName ?? "", filename);
         var destinationDirectory = Path.GetDirectoryName(destinationFilepath)!;
 
         Directory.CreateDirectory(destinationDirectory);
-        File.Copy(filepath, destinationFilepath, true);
+        File.Copy(reportMetadata.Filepath, destinationFilepath, true);
     }
 }

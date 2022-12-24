@@ -19,24 +19,21 @@ internal class PayrollService : IPayrollService
     private readonly IRazorLightEngine razorEngine;
     private readonly IPrintToPdfService pdfService;
     private readonly IRolloverService rolloverService;
-    private readonly IReadOnlyList<IPayrollPostProcessor> consolidatedPayrollPostProcessors;
-    private readonly IReadOnlyList<IPayrollPostProcessor> agentPayrollPostProcessors;
+    private readonly IReadOnlyList<IPayrollPostProcessor> postProcessors;
 
     public PayrollService(
         IReportingApiClient reportingApiClient,
         IRazorLightEngine razorEngine,
         IPrintToPdfService pdfService,
         IRolloverService rolloverService,
-        IReadOnlyList<IPayrollPostProcessor>? consolidatedPayrollPostProcessors = null,
-        IReadOnlyList<IPayrollPostProcessor>? agentPayrollPostProcessors = null
+        IEnumerable<IPayrollPostProcessor>? postProcessors = null
     )
     {
         this.reportingApiClient = reportingApiClient;
         this.razorEngine = razorEngine;
         this.pdfService = pdfService;
         this.rolloverService = rolloverService;
-        this.consolidatedPayrollPostProcessors = consolidatedPayrollPostProcessors ?? new List<IPayrollPostProcessor>();
-        this.agentPayrollPostProcessors = agentPayrollPostProcessors ?? new List<IPayrollPostProcessor>();
+        this.postProcessors = postProcessors?.ToList() ?? new List<IPayrollPostProcessor>();
 
         Directory.CreateDirectory(temporaryFolder);
     }
@@ -62,26 +59,26 @@ internal class PayrollService : IPayrollService
             })
         ).ToList();
 
-        var consolidatedReportFilename = await GenerateConsolidatedPayrollForWeekEnding(weekEndingDate, allBookings, allAdjustments);
+        var consolidatedReportMetadata = await GenerateConsolidatedPayrollForWeekEnding(weekEndingDate, allBookings, allAdjustments);
 
-        foreach (var postProcessor in consolidatedPayrollPostProcessors)
+        foreach (var postProcessor in postProcessors)
         {
-            postProcessor.Process(consolidatedReportFilename, weekEndingDate, null);
+            postProcessor.Process(consolidatedReportMetadata);
         }
 
         var bookingsAndAdjustmentsByAgent = await GetBookingsAndAdjustmentsByAgent(allBookings, allAdjustments);
         foreach (var (agent, bookings, adjustments) in bookingsAndAdjustmentsByAgent)
         {
-            var agentReportFilename = await GenerateAgentPayrollForWeekEnding(weekEndingDate, agent, bookings, adjustments);
+            var agentReportMetadata = await GenerateAgentPayrollForWeekEnding(weekEndingDate, agent, bookings, adjustments);
 
-            foreach (var postProcessor in agentPayrollPostProcessors)
+            foreach (var postProcessor in postProcessors)
             {
-                postProcessor.Process(agentReportFilename, weekEndingDate, agent);
+                postProcessor.Process(agentReportMetadata);
             }
         }
     }
-
-    private async Task<string> GenerateConsolidatedPayrollForWeekEnding(
+    
+    private async Task<ReportMetadata> GenerateConsolidatedPayrollForWeekEnding(
         DateOnly weekEndingDate,
         IReadOnlyCollection<Booking> bookings,
         IReadOnlyCollection<Adjustment> adjustments
@@ -96,10 +93,16 @@ internal class PayrollService : IPayrollService
         pdfService.PrintToPdf(temporaryHtmlFile, temporaryPdfFile);
         File.Delete(temporaryHtmlFile);
 
-        return temporaryPdfFile;
+        return new()
+        {
+            ReportType = ReportType.Consolidated,
+            Filepath = temporaryPdfFile,
+            WeekEndingDate = weekEndingDate,
+            Agent = null,
+        };
     }
 
-    private async Task<string> GenerateAgentPayrollForWeekEnding(
+    private async Task<ReportMetadata> GenerateAgentPayrollForWeekEnding(
         DateOnly weekEndingDate,
         Agent agent,
         IReadOnlyCollection<Booking> bookings,
@@ -116,7 +119,13 @@ internal class PayrollService : IPayrollService
         pdfService.PrintToPdf(temporaryHtmlFile, filename);
         File.Delete(temporaryHtmlFile);
 
-        return filename;
+        return new()
+        {
+            ReportType = ReportType.Agent,
+            Filepath = filename,
+            WeekEndingDate = weekEndingDate,
+            Agent = agent,
+        };
     }
 
     private async Task<IEnumerable<(Agent agent, List<Booking> bookings, List<Adjustment> adjustments)>> GetBookingsAndAdjustmentsByAgent(IReadOnlyCollection<Booking> allBookings, IReadOnlyCollection<Adjustment> allAdjustments) =>

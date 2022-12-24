@@ -1,6 +1,4 @@
-﻿using PaymentAutomation.Models;
-
-namespace PaymentAutomation.Services.Payroll;
+﻿namespace PaymentAutomation.Services.Payroll;
 
 internal class CopyConsolidatedFilePostProcessor : IPayrollPostProcessor
 {
@@ -9,13 +7,15 @@ internal class CopyConsolidatedFilePostProcessor : IPayrollPostProcessor
     public CopyConsolidatedFilePostProcessor(string outputFolder) =>
         this.outputFolder = outputFolder;
 
-    public void Process(string filepath, DateOnly weekEndingDate, Agent? agent)
+    public void Process(ReportMetadata reportMetadata)
     {
-        var filename = Path.GetFileName(filepath);
+        if (reportMetadata.ReportType is not ReportType.Consolidated) return;
+
+        var filename = Path.GetFileName(reportMetadata.Filepath);
         var destinationFilepath = Path.Combine(outputFolder, "Consolidated Reports", filename);
         var destinationDirectory = Path.GetDirectoryName(destinationFilepath)!;
 
         Directory.CreateDirectory(destinationDirectory);
-        File.Copy(filepath, destinationFilepath, true);
+        File.Copy(reportMetadata.Filepath, destinationFilepath, true);
     }
 }

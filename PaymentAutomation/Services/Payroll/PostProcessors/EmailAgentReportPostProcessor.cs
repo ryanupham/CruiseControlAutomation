@@ -28,20 +28,22 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
         this.ccEmail = ccEmail;
     }
 
-    public void Process(string filepath, DateOnly weekEndingDate, Agent? agent)
+    public void Process(ReportMetadata reportMetadata)
     {
-        if (agent is null) throw new ArgumentNullException(nameof(agent));
+        if (reportMetadata.ReportType is not ReportType.Agent) return;
 
-        DisplayPreview(filepath, agent);
+        if (reportMetadata.Agent is null) throw new ArgumentNullException(nameof(reportMetadata.Agent));
 
-        if (!DoesUserRequestToProceed(agent))
+        DisplayPreview(reportMetadata.Filepath, reportMetadata.Agent);
+
+        if (!DoesUserWishToProceed(reportMetadata.Agent))
         {
             Console.WriteLine("Skipping email");
             return;
         }
 
-        SendEmail(filepath, weekEndingDate, agent);
-        Console.WriteLine($"Email sent to {agent.FullName} at {agent.Settings.Email}");
+        SendEmail(reportMetadata.Filepath, reportMetadata.WeekEndingDate, reportMetadata.Agent);
+        Console.WriteLine($"Email sent to {reportMetadata.Agent.FullName} at {reportMetadata.Agent.Settings.Email}");
     }
 
     private void SendEmail(string filepath, DateOnly weekEndingDate, Agent agent)
@@ -97,7 +99,7 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
         previewProcess.Start();
     }
 
-    private static bool DoesUserRequestToProceed(Agent agent)
+    private static bool DoesUserWishToProceed(Agent agent)
     {
         string response;
         do
