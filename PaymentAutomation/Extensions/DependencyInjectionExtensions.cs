@@ -1,14 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using PaymentAutomation.DataAccess;
 using PaymentAutomation.Models;
+using PaymentAutomation.Services;
 using PaymentAutomation.Services.Payroll;
 using PaymentAutomation.Utilities;
 using RazorLight;
 
-namespace PaymentAutomation.Services;
+namespace PaymentAutomation.Extensions;
 
-internal static class ServiceCollectionExtensions
+internal static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddRazorEngine(this IServiceCollection services)
     {
@@ -24,24 +24,11 @@ internal static class ServiceCollectionExtensions
     {
         var agentSettingsProvider = new AgentSettingsProvider(appSettings.Agents);
 
-        var cookies = ChromeCookieManager.GetCookies(appSettings.Api.BaseUrl);
-        CruiseControlCookies ccCookies;
-
-        try
-        {
-            ccCookies = CruiseControlCookies.FromCookies(cookies);
-        }
-        catch (ArgumentException e)
-        {
-            throw new Exception("Unable to load cookies. Please ensure you are logged in to Cruise Control in Chrome.", e);
-        }
-
         return services.AddSingleton<IReportingApiClient>(
             sp => new ReportingApiClient(
                 new($"https://{appSettings.Api.BaseUrl}"),
                 appSettings.Api.AgencyId,
-                sp.GetRequiredService<IHttpClientFactory>(),
-                ccCookies,
+                sp.GetRequiredService<HttpClient>(),
                 agentSettingsProvider
             )
         );
@@ -65,7 +52,7 @@ internal static class ServiceCollectionExtensions
     public static IServiceCollection AddPayrollService(this IServiceCollection services, AppSettings appSettings)
     {
         var manager = appSettings.Agents.Values.Single(a => a.IsManager)!;
-        
+
         var isDryRun = Environment.GetCommandLineArgs().Contains("--dry-run");
         var isNoEmail = Environment.GetCommandLineArgs().Contains("--no-email");
         var shouldEmail = !(isDryRun || isNoEmail);

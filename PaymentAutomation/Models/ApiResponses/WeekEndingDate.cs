@@ -1,5 +1,4 @@
-﻿using PaymentAutomation.JsonConverters;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models.ApiResponses
 {

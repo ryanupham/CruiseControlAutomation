@@ -6,47 +6,46 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PaymentAutomation.Utilities;
+namespace CruiseControl.Utilities;
 
-// https://stackoverflow.com/questions/68643057/decrypt-google-cookies-in-c-sharp-net-framework
-static class ChromeCookieManager
+// based on https://stackoverflow.com/questions/68643057/decrypt-google-cookies-in-c-sharp-net-framework
+internal static class ChromeCookieManager
 {
     public static List<Cookie> GetCookies(string hostname)
     {
         var ChromeCookiePath = @$"C:\Users\{Environment.UserName}\AppData\Local\Google\Chrome\User Data\Default\Network\Cookies";
         var data = new List<Cookie>();
-        if (File.Exists(ChromeCookiePath))
+
+        if (!File.Exists(ChromeCookiePath))
         {
-            try
-            {
-                SQLitePCL.Batteries.Init();
-
-                using var conn = new SqliteConnection($"Data Source={ChromeCookiePath}");
-                using var cmd = conn.CreateCommand();
-                cmd.CommandText = $"SELECT name,encrypted_value,host_key FROM cookies WHERE host_key = '{hostname}'";
-                var key = AesGcm256.GetKey();
-
-                conn.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        if (!data.Any(a => a.Name == reader.GetString(0)))
-                        {
-                            var encryptedData = GetBytes(reader, 1);
-                            AesGcm256.Prepare(encryptedData, out var nonce, out var ciphertextTag);
-                            var value = AesGcm256.Decrypt(ciphertextTag, key, nonce);
-
-                            data.Add(new Cookie(reader.GetString(0), value));
-                        }
-                    }
-                }
-                conn.Close();
-            }
-            catch { }
+            throw new FileNotFoundException("Unable to find Chrome cookie file", ChromeCookiePath);
         }
-        return data;
 
+        SQLitePCL.Batteries.Init();
+
+        using var conn = new SqliteConnection($"Data Source={ChromeCookiePath}");
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"SELECT name,encrypted_value,host_key FROM cookies WHERE host_key = '{hostname}'";
+        var key = AesGcm256.GetKey();
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+            
+        while (reader.Read())
+        {
+            if (!data.Any(a => a.Name == reader.GetString(0)))
+            {
+                var encryptedData = GetBytes(reader, 1);
+                AesGcm256.Prepare(encryptedData, out var nonce, out var ciphertextTag);
+                var value = AesGcm256.Decrypt(ciphertextTag, key, nonce);
+
+                data.Add(new Cookie(reader.GetString(0), value));
+            }
+        }
+            
+        conn.Close();
+
+        return data;
     }
 
     private static byte[] GetBytes(SqliteDataReader reader, int columnIndex)
@@ -64,7 +63,7 @@ static class ChromeCookieManager
         return stream.ToArray();
     }
 
-    class AesGcm256
+    private class AesGcm256
     {
         public static byte[] GetKey()
         {
@@ -83,7 +82,6 @@ static class ChromeCookieManager
 
         public static string Decrypt(byte[] encryptedBytes, byte[] key, byte[] iv)
         {
-            var sR = string.Empty;
             try
             {
                 var cipher = new GcmBlockCipher(new AesEngine());
@@ -94,15 +92,12 @@ static class ChromeCookieManager
                 var retLen = cipher.ProcessBytes(encryptedBytes, 0, encryptedBytes.Length, plainBytes, 0);
                 cipher.DoFinal(plainBytes, retLen);
 
-                sR = Encoding.UTF8.GetString(plainBytes).TrimEnd("\r\n\0".ToCharArray());
+                return Encoding.UTF8.GetString(plainBytes).TrimEnd("\r\n\0".ToCharArray());
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
+                throw new Exception("Unable to decrypt cookie", ex);
             }
-
-            return sR;
         }
 
         public static void Prepare(byte[] encryptedData, out byte[] nonce, out byte[] ciphertextTag)

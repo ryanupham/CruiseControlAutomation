@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CruiseControl.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PaymentAutomation.Extensions;
 using PaymentAutomation.Models;
 using PaymentAutomation.Services;
-using PaymentAutomation.Services.Payroll;
 using PaymentAutomation.Utilities;
 using PaymentAutomation.Utilities.ConsoleOptions;
 using System.Text.Json;
@@ -22,40 +23,36 @@ public class Program
 
     public static async Task Main()
     {
-        var appSettings = GetAppSettings();
-        var serviceProvider = GetServiceProvider(appSettings);
-        var program = serviceProvider.GetRequiredService<Program>();
-
         try
         {
-            var weekEndingDate = await program.GetUserSelectedWeekEndingDate();
-
-            Console.WriteLine("\n\nProcessing...");
-            await program.GenerateReports(weekEndingDate);
-            Console.WriteLine("\n\nFinished.");
-
-            //var weekEndingDates = await program.GetWeekEndingDates();
-            //foreach (var weekEndingDate in weekEndingDates).OrderBy(d => d))
-            //{
-            //    Console.WriteLine($"Week {weekEndingDate}...");
-            //    await program.GenerateReports(weekEndingDate);
-            //}
+            await Run();
         }
         catch (JsonException e)
         {
-            Console.WriteLine($"\n\n{e}");  // TODO: log file
+            Console.WriteLine($"\n\n{e}");
 
             Console.WriteLine($"\n\nError: {e.Message}");
             Console.WriteLine("Please ensure you are logged in to Cruise Control");
         }
         catch (Exception e)
         {
-            Console.WriteLine($"\n\n{e}");  // TODO: log file
-
+            Console.WriteLine($"\n\n{e}");
             Console.WriteLine($"\n\nError: {e.Message}");
         }
-
+        
         Console.ReadKey();
+    }
+
+    private static async Task Run()
+    {
+        var appSettings = GetAppSettings();
+        var serviceProvider = GetServiceProvider(appSettings);
+        var program = serviceProvider.GetRequiredService<Program>();
+        var weekEndingDate = await program.GetUserSelectedWeekEndingDate();
+
+        Console.WriteLine("\n\nProcessing...");
+        await program.GenerateReports(weekEndingDate);
+        Console.WriteLine("\n\nFinished.");
     }
 
     private static AppSettings GetAppSettings()
@@ -63,7 +60,8 @@ public class Program
         var appsettingsFileName = "appsettings.json";
         var isFileInitialized = UserFileLoader.IsFileInitialized(appsettingsFileName);
         var appsettingsFilePath = UserFileLoader.LoadFilePath(appsettingsFileName);
-        var appsettingsFileDirectory = Path.GetDirectoryName(appsettingsFilePath);
+        var appsettingsFileDirectory = Path.GetDirectoryName(appsettingsFilePath)
+            ?? throw new Exception($"Unable to get directory for {appsettingsFilePath}");
         if (!isFileInitialized)
         {
             Console.WriteLine($"Please fill out the settings file at {appsettingsFilePath}");
@@ -75,17 +73,17 @@ public class Program
             .SetBasePath(appsettingsFileDirectory)
             .AddJsonFile(appsettingsFileName)
             .Build()
-            .Get<AppSettings>();
+            .Get<AppSettings>()
+            ?? throw new Exception($"Unable to load {appsettingsFileName}");
     }
 
     private static ServiceProvider GetServiceProvider(AppSettings appSettings) =>
         new ServiceCollection()
-            .AddSingleton(appSettings)
             .AddRazorEngine()
             .AddAgentRolloverRepository()
+            .AddCruiseControlHttpClient(appSettings.Api.BaseUrl)
             .AddReportingApiClient(appSettings)
             .AddPrintToPdfService(appSettings)
-            .AddHttpClient()
             .AddPayrollService(appSettings)
             .AddSingleton<IRolloverService, RolloverService>()
             .AddSingleton<Program>()

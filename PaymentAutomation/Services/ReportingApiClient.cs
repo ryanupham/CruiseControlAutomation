@@ -17,22 +17,19 @@ internal class ReportingApiClient : IReportingApiClient
 {
     private readonly Uri baseAddress;
     private readonly long agencyId;
-    private readonly IHttpClientFactory httpClientFactory;
-    private readonly CruiseControlCookies cruiseControlCookies;
+    private readonly HttpClient httpClient;
     private readonly IAgentSettingsProvider agentSettingsProvider;
 
     public ReportingApiClient(
         Uri baseAddress,
         long agencyId,
-        IHttpClientFactory httpClientFactory,
-        CruiseControlCookies cruiseControlCookies,
+        HttpClient httpClient,
         IAgentSettingsProvider agentSettingsProvider
     )
     {
         this.baseAddress = baseAddress;
         this.agencyId = agencyId;
-        this.httpClientFactory = httpClientFactory;
-        this.cruiseControlCookies = cruiseControlCookies;
+        this.httpClient = httpClient;
         this.agentSettingsProvider = agentSettingsProvider;
     }
 
@@ -121,8 +118,6 @@ internal class ReportingApiClient : IReportingApiClient
             payrollYear = null as object,
         };
 
-        var httpClient = GetHttpClientWithAuthorization();
-
         if (!apiResponses.ContainsKey(weekEndingDate.ToString()))
         {
             var response = await httpClient.PostAsJsonAsync(
@@ -140,8 +135,6 @@ internal class ReportingApiClient : IReportingApiClient
     {
         _getWeekEndingDates ??= new(async () =>
         {
-            var httpClient = GetHttpClientWithAuthorization();
-
             var response = await httpClient.GetAsync("/rpe-api/report/getWeekEndingDates");
             var result = await response.Content.ReadAsStringAsync();
 
@@ -167,8 +160,6 @@ internal class ReportingApiClient : IReportingApiClient
     {
         _getAgents ??= new(async () =>
         {
-            var httpClient = GetHttpClientWithAuthorization();
-
             var response = await httpClient.GetAsync($"rpe-api/common/agencyusers/{agencyId}");
             return (await response.Content.ReadFromJsonAsync<List<AgentListRecord>>())!
                 .Select(agent => (agent, valid: agentSettingsProvider.TryGet(agent.Id, out var settings), settings))
@@ -181,16 +172,5 @@ internal class ReportingApiClient : IReportingApiClient
         });
 
         return await _getAgents.Value;
-    }
-
-    private HttpClient GetHttpClientWithAuthorization()
-    {
-        var httpClient = httpClientFactory.CreateClient();
-        httpClient.DefaultRequestHeaders.Add("Cookie", $"{nameof(cruiseControlCookies.NSC_TMAS)}={cruiseControlCookies.NSC_TMAS}");
-        httpClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("bearer", cruiseControlCookies.accessToken);
-        httpClient.BaseAddress = baseAddress;
-
-        return httpClient;
     }
 }

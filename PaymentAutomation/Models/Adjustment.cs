@@ -1,5 +1,4 @@
 ﻿using PaymentAutomation.Enums;
-using PaymentAutomation.JsonConverters;
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
