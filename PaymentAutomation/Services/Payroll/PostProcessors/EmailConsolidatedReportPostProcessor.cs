@@ -71,7 +71,8 @@ internal class EmailConsolidatedReportPostProcessor : IPayrollPostProcessor
         var attachment = new MimePart("application", "pdf")
         {
             Content = new MimeContent(File.OpenRead(filepath)),
-            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+            ContentDisposition =
+                new ContentDisposition(ContentDisposition.Attachment),
             ContentTransferEncoding = ContentEncoding.Base64,
             FileName = Path.GetFileName(filepath),
         };

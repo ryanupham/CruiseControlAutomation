@@ -12,7 +12,10 @@ internal class CopyAgentFilePostProcessor : IPayrollPostProcessor
         if (reportMetadata.ReportType is not ReportType.Agent) return;
 
         var filename = Path.GetFileName(reportMetadata.Filepath);
-        var destinationFilepath = Path.Combine(outputFolder, reportMetadata.Agent?.FullName ?? "", filename);
+        var destinationFilepath = Path.Combine(
+            outputFolder,
+            reportMetadata.Agent?.FullName ?? "",
+            filename);
         var destinationDirectory = Path.GetDirectoryName(destinationFilepath)!;
 
         Directory.CreateDirectory(destinationDirectory);

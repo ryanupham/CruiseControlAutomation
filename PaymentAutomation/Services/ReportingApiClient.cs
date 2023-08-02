@@ -8,7 +8,8 @@ namespace PaymentAutomation.Services;
 
 public interface IReportingApiClient
 {
-    Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)> GetBookingsAndAdjustmentsForWeekEnding(DateOnly weekEndingDate);
+    Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)>
+        GetBookingsAndAdjustmentsForWeekEnding(DateOnly weekEndingDate);
     Task<IReadOnlyCollection<DateOnly>> GetWeekEndingDates();
     Task<IReadOnlyCollection<Agent>> GetAgents();
 }
@@ -33,12 +34,14 @@ internal class ReportingApiClient : IReportingApiClient
     private readonly Dictionary<DateOnly, Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)>> bookingsAndAdjustmentsForWeekEnding = new();
     public async Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)> GetBookingsAndAdjustmentsForWeekEnding(DateOnly weekEndingDate)
     {
-        if (bookingsAndAdjustmentsForWeekEnding.TryGetValue(weekEndingDate, out var booking))
+        if (bookingsAndAdjustmentsForWeekEnding
+            .TryGetValue(weekEndingDate, out var booking))
         {
             return await booking;
         }
 
-        var commissionReportApiResponseRaw = await GetCommissionReportApiResponse(weekEndingDate);
+        var commissionReportApiResponseRaw =
+            await GetCommissionReportApiResponse(weekEndingDate);
 
         var serializerOptions = new JsonSerializerOptions
         {
@@ -51,19 +54,28 @@ internal class ReportingApiClient : IReportingApiClient
             }
         };
 
-        var commissionReportApiResponse = JsonSerializer.Deserialize<CommissionDetailReportResponse>(commissionReportApiResponseRaw, serializerOptions)
-            ?? throw new InvalidDataException("Commission report could not be loaded");
-        if (!commissionReportApiResponse.Valid) throw new InvalidDataException("Commission report is marked invalid");
+        var commissionReportApiResponse = JsonSerializer
+            .Deserialize<CommissionDetailReportResponse>(
+                commissionReportApiResponseRaw,
+                serializerOptions)
+            ?? throw new InvalidDataException(
+                "Commission report could not be loaded");
+        if (!commissionReportApiResponse.Valid)
+        {
+            throw new InvalidDataException("Commission report is marked invalid");
+        }
 
         var allBookings =
-            from bookingGroup in commissionReportApiResponse.ConeCommisonTrackingHistoryDetailDtos.Values
+            from bookingGroup in commissionReportApiResponse
+                .ConeCommisonTrackingHistoryDetailDtos.Values
             from companyBookingGroup in bookingGroup.Values
             from numberedBookingGroup in companyBookingGroup.Values
             from bookingRecord in numberedBookingGroup
             where bookingRecord.Valid
             select bookingRecord;
         var allAdjustments =
-            from adjustmentGroup in commissionReportApiResponse.AdjustmentAmountsDtos.Values
+            from adjustmentGroup in commissionReportApiResponse
+                .AdjustmentAmountsDtos.Values
             from adjustmentRecord in adjustmentGroup
             where adjustmentRecord.Valid
             select adjustmentRecord;
@@ -101,7 +113,8 @@ internal class ReportingApiClient : IReportingApiClient
     }
 
     private readonly Dictionary<string, string> apiResponses = new();
-    private async Task<string> GetCommissionReportApiResponse(DateOnly weekEndingDate)
+    private async Task<string> GetCommissionReportApiResponse(
+        DateOnly weekEndingDate)
     {
         var payload = new
         {
@@ -121,7 +134,8 @@ internal class ReportingApiClient : IReportingApiClient
                 "/rpe-api/report/getCommTrackingHistoryDetailReport",
                 payload
             );
-            apiResponses[weekEndingDate.ToString()] = await response.Content.ReadAsStringAsync();
+            apiResponses[weekEndingDate.ToString()] =
+                await response.Content.ReadAsStringAsync();
         }
 
         return apiResponses[weekEndingDate.ToString()];
@@ -132,7 +146,8 @@ internal class ReportingApiClient : IReportingApiClient
     {
         _getWeekEndingDates ??= new(async () =>
         {
-            var response = await httpClient.GetAsync("/rpe-api/report/getWeekEndingDates");
+            var response =
+                await httpClient.GetAsync("/rpe-api/report/getWeekEndingDates");
             var result = await response.Content.ReadAsStringAsync();
 
             var serializerOptions = new JsonSerializerOptions
@@ -140,8 +155,12 @@ internal class ReportingApiClient : IReportingApiClient
                 Converters = { new DateOnlyConverter() }
             };
 
-            var weekEndingDates = JsonSerializer.Deserialize<IEnumerable<WeekEndingDate>>(result, serializerOptions)
-                ?? throw new InvalidDataException("Week ending dates could not be loaded");
+            var weekEndingDates = JsonSerializer
+                .Deserialize<IEnumerable<WeekEndingDate>>(
+                    result,
+                    serializerOptions)
+                ?? throw new InvalidDataException(
+                    "Week ending dates could not be loaded");
 
             return weekEndingDates
                 .Where(d => d.Valid)
@@ -157,9 +176,16 @@ internal class ReportingApiClient : IReportingApiClient
     {
         _getAgents ??= new(async () =>
         {
-            var response = await httpClient.GetAsync($"rpe-api/common/agencyusers/{agencyId}");
-            return (await response.Content.ReadFromJsonAsync<List<AgentListRecord>>())!
-                .Select(agent => (agent, valid: agentSettingsProvider.TryGet(agent.Id, out var settings), settings))
+            var response = await httpClient.GetAsync(
+                $"rpe-api/common/agencyusers/{agencyId}");
+            var agentList = await response.Content
+                .ReadFromJsonAsync<List<AgentListRecord>>();
+            return agentList!
+                .Select(agent => (
+                    agent,
+                    valid: agentSettingsProvider
+                        .TryGet(agent.Id, out var settings),
+                    settings))
                 .Where(t => t.valid)
                 .Select(t => t.agent with
                 {
@@ -167,7 +193,7 @@ internal class ReportingApiClient : IReportingApiClient
                 })
                 .ToList();
         });
-
+        
         return await _getAgents.Value;
     }
 }

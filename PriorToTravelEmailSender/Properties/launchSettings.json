@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PriorToTravelEmailSender": {
+      "commandName": "Project",
+      "commandLineArgs": "--no-email"
+    }
+  }
+}

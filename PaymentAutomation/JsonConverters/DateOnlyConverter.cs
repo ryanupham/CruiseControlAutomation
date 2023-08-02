@@ -5,16 +5,24 @@ namespace PaymentAutomation.JsonConverters;
 
 internal class DateOnlyConverter : JsonConverter<DateOnly>
 {
-    public override DateOnly Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override DateOnly Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Number)
         {
-            if (!reader.TryGetInt64(out var numericDate)) throw new JsonException();
+            if (!reader.TryGetInt64(out var numericDate))
+            {
+                throw new JsonException();
+            }
+
             return GetDateOnlyFromNumber(numericDate);
         }
         else if (reader.TokenType == JsonTokenType.String)
         {
-            var stringDate = reader.GetString() ?? throw new JsonException();
+            var stringDate = reader.GetString()
+                ?? throw new JsonException();
             return GetDateOnlyFromString(stringDate);
         }
 
@@ -32,6 +40,9 @@ internal class DateOnlyConverter : JsonConverter<DateOnly>
             ? DateOnly.FromDateTime(dateTime)
             : throw new JsonException();
 
-    public override void Write(Utf8JsonWriter writer, DateOnly value, JsonSerializerOptions options) =>
-        throw new NotImplementedException();
+    public override void Write(
+        Utf8JsonWriter writer,
+        DateOnly value,
+        JsonSerializerOptions options) =>
+            throw new NotImplementedException();
 }

@@ -1,6 +1,6 @@
-﻿using CruiseControl.Utilities;
+﻿using CruiseControl.DataAccess;
+using CruiseControl.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using PaymentAutomation.DataAccess;
 using PaymentAutomation.Models;
 using PaymentAutomation.Services;
 using PaymentAutomation.Services.Payroll;
@@ -31,12 +31,14 @@ internal static class DependencyInjectionExtensions
                 agentSettingsProvider));
     }
 
-    public static IServiceCollection AddAgentRolloverRepository(this IServiceCollection services)
+    public static IServiceCollection AddAgentRolloverService(this IServiceCollection services)
     {
         var filePath = UserFileHelper.InitializeFile("agentBalanceByWeek.json");
-        var agentRolloverRepository = new AgentRolloverRepository(filePath);
-
-        return services.AddSingleton<IRepository<(DateOnly weekEndingDate, string agentId), decimal>>(agentRolloverRepository);
+        return services
+            .AddSingleton<ISimpleDataStore<AgentRolloverCollection>>(
+                new JsonFileDataStore<AgentRolloverCollection>(
+                    new FileTextDataStore(filePath)))
+            .AddSingleton<IAgentRolloverService, AgentRolloverService>();
     }
 
     public static IServiceCollection AddPrintToPdfService(this IServiceCollection services, string chromePath) =>

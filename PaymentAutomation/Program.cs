@@ -14,7 +14,9 @@ public class Program
     private readonly IReportingApiClient reportingApiClient;
     private readonly IPayrollService payrollService;
 
-    public Program(IReportingApiClient reportingApiClient, IPayrollService payrollService)
+    public Program(
+        IReportingApiClient reportingApiClient,
+        IPayrollService payrollService)
     {
         this.reportingApiClient = reportingApiClient;
         this.payrollService = payrollService;
@@ -58,7 +60,7 @@ public class Program
     private static ServiceProvider GetServiceProvider(AppSettings appSettings) =>
         new ServiceCollection()
             .AddRazorEngine()
-            .AddAgentRolloverRepository()
+            .AddAgentRolloverService()
             .AddCruiseControlHttpClient(appSettings.Api.BaseUrl)
             .AddReportingApiClient(appSettings)
             .AddPrintToPdfService(appSettings.ChromePath)
@@ -81,7 +83,9 @@ public class Program
                 .Select(d => new Option<DateOnly>(d.ToString(), d))
                 .ToList()
         );
-        var optionSelector = new ConsoleOptionSelector<DateOnly>(dateOptions, "Select the week ending date: ");
+        var optionSelector = new ConsoleOptionSelector<DateOnly>(
+            dateOptions,
+            "Select the week ending date: ");
 
         return optionSelector.GetSelectedOption();
     }

@@ -13,8 +13,9 @@ internal class AgentSettingsProvider : IAgentSettingsProvider
 {
     private readonly IReadOnlyDictionary<string, AgentSettings> agentSettings;
 
-    public AgentSettingsProvider(IReadOnlyDictionary<string, AgentSettings> agentSettings) =>
-        this.agentSettings = agentSettings;
+    public AgentSettingsProvider(
+        IReadOnlyDictionary<string, AgentSettings> agentSettings) =>
+            this.agentSettings = agentSettings;
 
     public bool TryGet(string agentId, out AgentSettings settings) =>
         agentSettings.TryGetValue(agentId, out settings!);

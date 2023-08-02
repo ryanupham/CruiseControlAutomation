@@ -33,7 +33,10 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
     {
         if (reportMetadata.ReportType is not ReportType.Agent) return;
 
-        if (reportMetadata.Agent is null) throw new ArgumentNullException(nameof(reportMetadata.Agent));
+        if (reportMetadata.Agent is null)
+        {
+            throw new ArgumentNullException(nameof(reportMetadata.Agent));
+        }
 
         DisplayPreview(reportMetadata.Filepath, reportMetadata.Agent);
 
@@ -43,7 +46,10 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
             return;
         }
 
-        SendEmail(reportMetadata.Filepath, reportMetadata.WeekEndingDate, reportMetadata.Agent);
+        SendEmail(
+            reportMetadata.Filepath,
+            reportMetadata.WeekEndingDate,
+            reportMetadata.Agent);
         Console.WriteLine($"Email sent to {reportMetadata.Agent.FullName} at {reportMetadata.Agent.Settings.Email}");
     }
 
@@ -58,11 +64,15 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
         smtpClient.Disconnect(true);
     }
 
-    private MimeMessage CreateMailMessage(string filepath, DateOnly weekEndingDate, Agent agent)
+    private MimeMessage CreateMailMessage(
+        string filepath,
+        DateOnly weekEndingDate,
+        Agent agent)
     {
         var mailMessage = new MimeMessage();
         mailMessage.From.Add(new MailboxAddress(fromName, fromEmail));
-        mailMessage.To.Add(new MailboxAddress(agent.FullName, agent.Settings.Email));
+        mailMessage.To.Add(
+            new MailboxAddress(agent.FullName, agent.Settings.Email));
         if (!string.IsNullOrEmpty(ccName) && !string.IsNullOrEmpty(ccEmail))
         {
             mailMessage.Cc.Add(new MailboxAddress(ccName, ccEmail));
@@ -77,7 +87,8 @@ internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
         var attachment = new MimePart("application", "pdf")
         {
             Content = new MimeContent(File.OpenRead(filepath)),
-            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+            ContentDisposition =
+                new ContentDisposition(ContentDisposition.Attachment),
             ContentTransferEncoding = ContentEncoding.Base64,
             FileName = Path.GetFileName(filepath)
         };

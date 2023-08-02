@@ -12,7 +12,10 @@ internal class CopyConsolidatedFilePostProcessor : IPayrollPostProcessor
         if (reportMetadata.ReportType is not ReportType.Consolidated) return;
 
         var filename = Path.GetFileName(reportMetadata.Filepath);
-        var destinationFilepath = Path.Combine(outputFolder, "Consolidated Reports", filename);
+        var destinationFilepath = Path.Combine(
+            outputFolder,
+            "Consolidated Reports",
+            filename);
         var destinationDirectory = Path.GetDirectoryName(destinationFilepath)!;
 
         Directory.CreateDirectory(destinationDirectory);
