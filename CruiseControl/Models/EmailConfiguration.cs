@@ -1,4 +1,4 @@
-﻿namespace PaymentAutomation.Models;
+﻿namespace CruiseControl.Models;
 
 public record EmailConfiguration
 {

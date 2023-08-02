@@ -15,19 +15,16 @@ public interface IReportingApiClient
 
 internal class ReportingApiClient : IReportingApiClient
 {
-    private readonly Uri baseAddress;
     private readonly long agencyId;
     private readonly HttpClient httpClient;
     private readonly IAgentSettingsProvider agentSettingsProvider;
 
     public ReportingApiClient(
-        Uri baseAddress,
         long agencyId,
         HttpClient httpClient,
         IAgentSettingsProvider agentSettingsProvider
     )
     {
-        this.baseAddress = baseAddress;
         this.agencyId = agencyId;
         this.httpClient = httpClient;
         this.agentSettingsProvider = agentSettingsProvider;

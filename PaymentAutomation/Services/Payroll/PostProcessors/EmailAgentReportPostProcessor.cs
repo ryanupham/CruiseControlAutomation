@@ -1,4 +1,5 @@
-﻿using MailKit.Net.Smtp;
+﻿using CruiseControl.Models;
+using MailKit.Net.Smtp;
 using MimeKit;
 using PaymentAutomation.Models;
 using System.Diagnostics;

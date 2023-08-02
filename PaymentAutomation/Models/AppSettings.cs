@@ -1,4 +1,6 @@
-﻿namespace PaymentAutomation.Models;
+﻿using CruiseControl.Models;
+
+namespace PaymentAutomation.Models;
 
 public record AppSettings
 {

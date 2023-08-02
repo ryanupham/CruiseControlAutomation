@@ -1,10 +1,9 @@
 ﻿using CruiseControl.Extensions;
-using Microsoft.Extensions.Configuration;
+using CruiseControl.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using PaymentAutomation.Extensions;
 using PaymentAutomation.Models;
 using PaymentAutomation.Services;
-using PaymentAutomation.Utilities;
 using PaymentAutomation.Utilities.ConsoleOptions;
 using System.Text.Json;
 
@@ -45,7 +44,8 @@ public class Program
 
     private static async Task Run()
     {
-        var appSettings = GetAppSettings();
+        var appSettings =
+            UserFileHelper.LoadSettingsFile<AppSettings>("appsettings.json");
         var serviceProvider = GetServiceProvider(appSettings);
         var program = serviceProvider.GetRequiredService<Program>();
         var weekEndingDate = await program.GetUserSelectedWeekEndingDate();
@@ -55,35 +55,13 @@ public class Program
         Console.WriteLine("\n\nFinished.");
     }
 
-    private static AppSettings GetAppSettings()
-    {
-        var appsettingsFileName = "appsettings.json";
-        var isFileInitialized = UserFileLoader.IsFileInitialized(appsettingsFileName);
-        var appsettingsFilePath = UserFileLoader.LoadFilePath(appsettingsFileName);
-        var appsettingsFileDirectory = Path.GetDirectoryName(appsettingsFilePath)
-            ?? throw new Exception($"Unable to get directory for {appsettingsFilePath}");
-        if (!isFileInitialized)
-        {
-            Console.WriteLine($"Please fill out the settings file at {appsettingsFilePath}");
-            Console.WriteLine("When finished, press any key to continue...");
-            Console.ReadKey();
-        }
-
-        return new ConfigurationBuilder()
-            .SetBasePath(appsettingsFileDirectory)
-            .AddJsonFile(appsettingsFileName)
-            .Build()
-            .Get<AppSettings>()
-            ?? throw new Exception($"Unable to load {appsettingsFileName}");
-    }
-
     private static ServiceProvider GetServiceProvider(AppSettings appSettings) =>
         new ServiceCollection()
             .AddRazorEngine()
             .AddAgentRolloverRepository()
             .AddCruiseControlHttpClient(appSettings.Api.BaseUrl)
             .AddReportingApiClient(appSettings)
-            .AddPrintToPdfService(appSettings)
+            .AddPrintToPdfService(appSettings.ChromePath)
             .AddPayrollService(appSettings)
             .AddSingleton<IRolloverService, RolloverService>()
             .AddSingleton<Program>()
