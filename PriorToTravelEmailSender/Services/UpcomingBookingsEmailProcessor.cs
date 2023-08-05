@@ -4,7 +4,6 @@ using PriorToTravelEmailSender.Extensions;
 using PriorToTravelEmailSender.Models;
 
 namespace PriorToTravelEmailSender.Services;
-
 internal interface IUpcomingBookingsEmailProcessor
 {
     Task Run(int daysUntilTravel);

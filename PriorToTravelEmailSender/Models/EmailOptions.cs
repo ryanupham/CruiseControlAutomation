@@ -1,5 +1,4 @@
 ﻿namespace PriorToTravelEmailSender.Models;
-
 internal record EmailOptions
 {
     public List<string> Cc { get; init; } = new List<string>();

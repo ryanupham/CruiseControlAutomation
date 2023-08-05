@@ -1,7 +1,6 @@
 ﻿using System.Net;
 
 namespace CruiseControl.Models;
-
 #pragma warning disable IDE1006 // Naming Styles
 public record CruiseControlCookies(string JSESSIONID, string NSC_TMAS, string accessToken, string refreshToken, string username)
 #pragma warning restore IDE1006 // Naming Styles

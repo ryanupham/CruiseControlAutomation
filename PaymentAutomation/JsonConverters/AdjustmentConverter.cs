@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.JsonConverters;
-
 internal class AdjustmentConverter : JsonConverter<Adjustment>
 {
     public override Adjustment Read(

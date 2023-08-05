@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
-
 public record Adjustment
 {
     [JsonPropertyName("commTypeDesc")]

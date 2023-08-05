@@ -5,7 +5,6 @@ using PaymentAutomation.Models;
 using System.Diagnostics;
 
 namespace PaymentAutomation.Services.Payroll;
-
 internal class EmailAgentReportPostProcessor : IPayrollPostProcessor
 {
     private readonly EmailConfiguration emailSettings;

@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
-
 public record AgentListRecord : Agent
 {
     [JsonPropertyName("username")]

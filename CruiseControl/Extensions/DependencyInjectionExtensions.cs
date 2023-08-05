@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Headers;
 
 namespace CruiseControl.Extensions;
-
 public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddUserService(

@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 
 namespace PaymentAutomation.Services;
-
 public interface IPrintToPdfService
 {
     void PrintToPdf(string htmlFilePath, string outFilePath);

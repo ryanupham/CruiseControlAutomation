@@ -3,8 +3,8 @@ using PriorToTravelEmailSender.Extensions;
 using PriorToTravelEmailSender.Models;
 
 namespace PriorToTravelEmailSender.Services;
-
-internal class ApplicationExecutionHistoryService : IApplicationExecutionHistoryService
+internal class ApplicationExecutionHistoryService
+    : IApplicationExecutionHistoryService
 {
     private readonly ISimpleDataStore<ExecutionHistoryDetails> dataStore;
 
@@ -34,10 +34,10 @@ internal class ApplicationExecutionHistoryService : IApplicationExecutionHistory
     {
         var currentExecutionDetails = GetExecutionHistoryDetails();
         var processedBookings =
-            currentExecutionDetails.ProcessedBookings.ToList();
+            currentExecutionDetails.ProcessedBookings.ToHashSet();
         processedBookings.Add(bookingId);
         var newExecutionDetails = currentExecutionDetails
-            with { ProcessedBookings = processedBookings.Distinct().ToList() };
+            with { ProcessedBookings = processedBookings.ToList() };
         dataStore.Write(newExecutionDetails);
     }
 

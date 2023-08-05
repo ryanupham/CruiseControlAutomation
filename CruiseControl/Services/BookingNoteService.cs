@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 
 namespace CruiseControl.Services;
-
 public interface IBookingNoteService
 {
     Task<long> AddNote(long bookingId, BookingNoteCreate note);

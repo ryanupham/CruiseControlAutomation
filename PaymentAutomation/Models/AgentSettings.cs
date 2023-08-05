@@ -1,5 +1,4 @@
 ﻿namespace PaymentAutomation.Models;
-
 public record AgentSettings
 {
     public string Name { get; init; } = string.Empty;

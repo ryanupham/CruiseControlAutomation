@@ -2,7 +2,6 @@
 using PaymentAutomation.Models;
 
 namespace PaymentAutomation.Services;
-
 internal interface IRolloverService
 {
     Task<IReadOnlyCollection<Rollover>> ProcessRollovers(

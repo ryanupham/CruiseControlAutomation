@@ -5,13 +5,12 @@ using MimeKit.Text;
 using PriorToTravelEmailSender.Models;
 
 namespace PriorToTravelEmailSender.Services;
-
 internal class PreferenceFormEmailService : IBookingEmailService
 {
     private readonly EmailOptions emailOptions;
     private readonly ILogger<PreferenceFormEmailService> logger;
     private readonly IEmailService emailService;
-    
+
     public PreferenceFormEmailService(
         EmailOptions emailOptions,
         ILogger<PreferenceFormEmailService> logger,

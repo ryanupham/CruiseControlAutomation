@@ -1,7 +1,6 @@
 ﻿using PaymentAutomation.Models;
 
 namespace PaymentAutomation.Services.Payroll;
-
 public record ReportMetadata
 {
     public ReportType ReportType { get; init; }

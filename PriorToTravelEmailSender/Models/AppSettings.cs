@@ -1,7 +1,6 @@
 ﻿using CruiseControl.Models;
 
 namespace PriorToTravelEmailSender.Models;
-
 internal record AppSettings
 {
     public EmailConfiguration EmailConfiguration { get; init; } = new();

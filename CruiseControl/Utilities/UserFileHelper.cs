@@ -2,15 +2,16 @@
 using System.Reflection;
 
 namespace CruiseControl.Utilities;
-
 public static class UserFileHelper
 {
     private static readonly string ApplicationDataDirectory =
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData),
             Assembly.GetEntryAssembly()?.GetName().Name
-                ?? throw new InvalidOperationException("Unable to load assembly name")
-        );
+                ?? throw new InvalidOperationException(
+                    "Unable to load assembly name"));
+
     private static readonly string BundledFileDirectory =
         AppDomain.CurrentDomain.BaseDirectory;
 

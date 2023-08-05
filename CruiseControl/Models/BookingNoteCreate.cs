@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace CruiseControl.Models;
-
 public record BookingNoteCreate(
     [property: JsonPropertyName("notes")] string Notes,
     [property: JsonPropertyName("popUp")] bool PopUp,

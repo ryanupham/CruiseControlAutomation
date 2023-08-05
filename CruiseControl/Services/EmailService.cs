@@ -1,7 +1,6 @@
 ﻿using MimeKit;
 
 namespace CruiseControl.Services;
-
 public interface IEmailService
 {
     Task SendEmailAsync(MimeMessage message);

@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace CruiseControl.JsonConverters;
-
 internal class ColonlessOffsetToDateTimeConverter : JsonConverter<DateTime>
 {
     public override DateTime Read(

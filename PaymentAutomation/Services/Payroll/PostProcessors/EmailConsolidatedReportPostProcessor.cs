@@ -3,7 +3,6 @@ using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace PaymentAutomation.Services.Payroll;
-
 internal class EmailConsolidatedReportPostProcessor : IPayrollPostProcessor
 {
     private readonly EmailConfiguration emailSettings;

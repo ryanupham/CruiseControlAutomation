@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.JsonConverters;
-
 internal class DateOnlyConverter : JsonConverter<DateOnly>
 {
     public override DateOnly Read(

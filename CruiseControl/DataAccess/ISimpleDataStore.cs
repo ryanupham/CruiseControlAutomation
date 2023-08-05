@@ -1,5 +1,4 @@
 ﻿namespace CruiseControl.DataAccess;
-
 public interface ISimpleDataStore<T>
 {
     T? Read();

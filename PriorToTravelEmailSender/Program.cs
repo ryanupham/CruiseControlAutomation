@@ -7,7 +7,6 @@ using PriorToTravelEmailSender.Services;
 using System.Diagnostics;
 
 namespace PriorToTravelEmailSender;
-
 internal class Program
 {
     public static async Task Main()

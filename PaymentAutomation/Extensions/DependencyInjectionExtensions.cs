@@ -7,7 +7,6 @@ using PaymentAutomation.Services.Payroll;
 using RazorLight;
 
 namespace PaymentAutomation.Extensions;
-
 internal static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddRazorEngine(this IServiceCollection services)

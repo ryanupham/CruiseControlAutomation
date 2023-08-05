@@ -1,5 +1,4 @@
 ﻿namespace PriorToTravelEmailSender.Services;
-
 internal interface IApplicationExecutionHistoryService
 {
     void AddProcessedBookingId(long bookingId);

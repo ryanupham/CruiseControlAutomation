@@ -16,7 +16,7 @@ internal static class DependencyInjectionExtensions
     {
         return services
             .AddSingleton<IUpcomingBookingsEmailProcessor, UpcomingBookingsEmailProcessor>()
-            .AddBookingsService(appSettings.Username)
+            .AddBookingService(appSettings.Username)
             .AddBookingEmailService(appSettings.EmailOptions)
             .AddBookingNoteService()
             .AddCruiseControlHttpClient(appSettings.BaseUrl)
@@ -47,30 +47,27 @@ internal static class DependencyInjectionExtensions
                     new FileTextDataStore(filePath)));
     }
 
-    private static IServiceCollection AddBookingsService(
+    private static IServiceCollection AddBookingService(
         this IServiceCollection services,
         string username) =>
             services
-                .AddSingleton(new BookingsServiceSettings(username))
+                .AddSingleton(new BookingServiceSettings(username))
                 .AddSingleton<IBookingService, BookingService>();
 
     private static IServiceCollection AddBookingEmailService(
         this IServiceCollection services,
-        EmailOptions emailOptions)
-    {
-        var shouldEmail = !(IsDryRun || IsNoEmail);
-        return shouldEmail
-            ? services
-                .AddSingleton(emailOptions)
-                .AddSingleton<IBookingEmailService, PreferenceFormEmailService>()
-            : services.AddSingleton<IBookingEmailService, NullBookingEmailService>();
-    }
+        EmailOptions emailOptions) =>
+            IsNoEmail
+                ? services.AddSingleton<IBookingEmailService, NullBookingEmailService>()
+                : services
+                    .AddSingleton(emailOptions)
+                    .AddSingleton<IBookingEmailService, PreferenceFormEmailService>();
 
     private static IServiceCollection AddBookingNoteService(
         this IServiceCollection services) =>
             IsNoNotes
-                ? services.AddSingleton<IBookingNoteService, NullBookingNotesService>()
-                : services.AddBookingNoteService();
+                ? services.AddSingleton<IBookingNoteService, NullBookingNoteService>()
+                : services.AddSingleton<IBookingNoteService, BookingNoteService>();
 
     private static bool IsDryRun =>
         Environment.GetCommandLineArgs().Contains("--dry-run");

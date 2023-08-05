@@ -1,5 +1,4 @@
 ﻿namespace PaymentAutomation.Utilities.ConsoleOptions;
-
 internal class ConsoleOptionSelector<T>
 {
     private readonly OptionList<T> options;
@@ -22,8 +21,10 @@ internal class ConsoleOptionSelector<T>
             key = Console.ReadKey().Key;
             options.SelectedIndex = key switch
             {
-                ConsoleKey.UpArrow => Math.Max(options.SelectedIndex - 1, 0),
-                ConsoleKey.DownArrow => Math.Min(options.SelectedIndex + 1, options.Count - 1),
+                ConsoleKey.UpArrow =>
+                    Math.Max(options.SelectedIndex - 1, 0),
+                ConsoleKey.DownArrow =>
+                    Math.Min(options.SelectedIndex + 1, options.Count - 1),
                 _ => options.SelectedIndex
             };
         } while (key != ConsoleKey.Enter);

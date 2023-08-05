@@ -3,7 +3,6 @@ using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace CruiseControl.Services;
-
 public interface ISmtpClientFactory
 {
     SmtpClient CreateClient();

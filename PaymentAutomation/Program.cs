@@ -8,7 +8,6 @@ using PaymentAutomation.Utilities.ConsoleOptions;
 using System.Text.Json;
 
 namespace PaymentAutomation;
-
 public class Program
 {
     private readonly IReportingApiClient reportingApiClient;
@@ -40,7 +39,7 @@ public class Program
             Console.WriteLine($"\n\n{e}");
             Console.WriteLine($"\n\nError: {e.Message}");
         }
-        
+
         Console.ReadKey();
     }
 

@@ -1,5 +1,4 @@
 ﻿namespace CruiseControl.Models;
-
 public record BookingNote(
     bool CancellationNote,
     DateTime createDate,

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace CruiseControl.Services;
-
 public interface IUserService
 {
     Task<UserProfile> GetUserProfile();

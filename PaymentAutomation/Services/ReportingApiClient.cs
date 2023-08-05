@@ -5,7 +5,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace PaymentAutomation.Services;
-
 public interface IReportingApiClient
 {
     Task<(IReadOnlyCollection<Booking> bookings, IReadOnlyCollection<Adjustment> adjustments)>
@@ -23,8 +22,7 @@ internal class ReportingApiClient : IReportingApiClient
     public ReportingApiClient(
         long agencyId,
         HttpClient httpClient,
-        IAgentSettingsProvider agentSettingsProvider
-    )
+        IAgentSettingsProvider agentSettingsProvider)
     {
         this.agencyId = agencyId;
         this.httpClient = httpClient;
@@ -180,6 +178,7 @@ internal class ReportingApiClient : IReportingApiClient
                 $"rpe-api/common/agencyusers/{agencyId}");
             var agentList = await response.Content
                 .ReadFromJsonAsync<List<AgentListRecord>>();
+
             return agentList!
                 .Select(agent => (
                     agent,
@@ -193,7 +192,7 @@ internal class ReportingApiClient : IReportingApiClient
                 })
                 .ToList();
         });
-        
+
         return await _getAgents.Value;
     }
 }

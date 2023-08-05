@@ -1,5 +1,4 @@
 ﻿namespace CruiseControl.Models;
-
 public record UserProfile(
     string FirstName,
     string LastName,

@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 
 namespace PriorToTravelEmailSender.Services;
-
 internal interface IBookingService
 {
     IAsyncEnumerable<Booking> GetBookingsWithContactEmailsAsync(
@@ -18,19 +17,19 @@ internal interface IBookingService
 internal class BookingService : IBookingService
 {
     private readonly ILogger<BookingService> logger;
-    private readonly BookingsServiceSettings settings;
+    private readonly BookingServiceSettings settings;
     private readonly CruiseControlClient httpClient;
 
     public BookingService(
         ILogger<BookingService> logger,
-        BookingsServiceSettings settings,
+        BookingServiceSettings settings,
         CruiseControlClient httpClient)
     {
         this.logger = logger;
         this.settings = settings;
         this.httpClient = httpClient;
     }
-    
+
     public async IAsyncEnumerable<Booking> GetBookingsWithContactEmailsAsync(
         IEnumerable<Booking> bookings)
     {
@@ -64,19 +63,20 @@ internal class BookingService : IBookingService
         };
         foreach (var url in urls)
         {
-            var (success, bookingDetails) = await TryGetBookingReviewDetailsByUrl(url);
+            var (success, bookingDetails) =
+                await TryGetBookingReviewDetailsByUrl(url);
             if (success) return bookingDetails!;
         }
 
         throw new Exception($"Failed to fetch booking details for {bookingId}");
     }
-    
+
     private async Task<(bool success, dynamic? bookingReviewDetails)>
         TryGetBookingReviewDetailsByUrl(string url)
     {
         var response = await httpClient.GetAsync(url);
         if (!response.IsSuccessStatusCode) return (false, null);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonConvert.DeserializeObject<dynamic>(content);
         return (result is not null, result);

@@ -1,6 +1,6 @@
 ﻿namespace PriorToTravelEmailSender.Services;
-
-internal class ReadOnlyApplicationExecutionHistoryService : IApplicationExecutionHistoryService
+internal class ReadOnlyApplicationExecutionHistoryService
+    : IApplicationExecutionHistoryService
 {
     private readonly IApplicationExecutionHistoryService delegateService;
 

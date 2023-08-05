@@ -1,7 +1,6 @@
 ﻿using CruiseControl.Models;
 
 namespace PaymentAutomation.Models;
-
 public record AppSettings
 {
     public Dictionary<string, AgentSettings> Agents { get; init; } = new();

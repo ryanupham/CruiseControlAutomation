@@ -3,11 +3,11 @@ using CruiseControl.Services;
 using Microsoft.Extensions.Logging;
 
 namespace PriorToTravelEmailSender.Services;
-internal class NullBookingNotesService : IBookingNoteService
+internal class NullBookingNoteService : IBookingNoteService
 {
-    private readonly ILogger<NullBookingNotesService> logger;
+    private readonly ILogger<NullBookingNoteService> logger;
 
-    public NullBookingNotesService(ILogger<NullBookingNotesService> logger) =>
+    public NullBookingNoteService(ILogger<NullBookingNoteService> logger) =>
         this.logger = logger;
 
     public Task<long> AddNote(long bookingId, BookingNoteCreate note)

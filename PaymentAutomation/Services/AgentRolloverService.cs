@@ -2,7 +2,6 @@
 using PaymentAutomation.Models;
 
 namespace PaymentAutomation.Services;
-
 internal interface IAgentRolloverService
 {
     void Add(DateOnly weekEndingDate, string agentId, decimal amount);

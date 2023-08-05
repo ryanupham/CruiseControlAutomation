@@ -1,5 +1,4 @@
 ﻿namespace PaymentAutomation.Services.Payroll;
-
 internal class CopyConsolidatedFilePostProcessor : IPayrollPostProcessor
 {
     private readonly string outputFolder;

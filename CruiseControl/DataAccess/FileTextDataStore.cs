@@ -1,5 +1,4 @@
 ﻿namespace CruiseControl.DataAccess;
-
 public class FileTextDataStore : ISimpleDataStore<string>
 {
     private readonly string filePath;
@@ -10,6 +9,6 @@ public class FileTextDataStore : ISimpleDataStore<string>
     public string Read() =>
         File.ReadAllText(filePath);
 
-    public void Write(string contents) =>
+    public void Write(string? contents) =>
         File.WriteAllText(filePath, contents);
 }

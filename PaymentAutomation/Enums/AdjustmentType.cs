@@ -1,5 +1,4 @@
 ﻿namespace PaymentAutomation.Enums;
-
 public class AdjustmentType
 {
     public static readonly AdjustmentType ABriggsPassportVisa = new("A Briggs Passport Visa");

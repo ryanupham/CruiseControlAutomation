@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.Models;
-
 internal record CommissionReport
 {
     [JsonPropertyName("coneCommisonTrackingHistoryDetailDtos")]

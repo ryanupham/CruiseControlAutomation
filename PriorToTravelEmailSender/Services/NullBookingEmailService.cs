@@ -2,7 +2,6 @@
 using PriorToTravelEmailSender.Models;
 
 namespace PriorToTravelEmailSender.Services;
-
 internal class NullBookingEmailService : IBookingEmailService
 {
     private readonly ILogger<NullBookingEmailService> logger;
@@ -16,7 +15,7 @@ internal class NullBookingEmailService : IBookingEmailService
             "Would have sent email to {FullName} ({ContactEmail})",
             booking.FullName,
             booking.ContactEmail);
-        
+
         return Task.CompletedTask;
     }
 }

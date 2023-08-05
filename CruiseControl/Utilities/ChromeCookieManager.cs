@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace CruiseControl.Utilities;
-
 // based on https://stackoverflow.com/questions/68643057/decrypt-google-cookies-in-c-sharp-net-framework
 internal static class ChromeCookieManager
 {
@@ -18,7 +17,9 @@ internal static class ChromeCookieManager
 
         if (!File.Exists(ChromeCookiePath))
         {
-            throw new FileNotFoundException("Unable to find Chrome cookie file", ChromeCookiePath);
+            throw new FileNotFoundException(
+                "Unable to find Chrome cookie file",
+                ChromeCookiePath);
         }
 
         SQLitePCL.Batteries.Init();
@@ -30,19 +31,25 @@ internal static class ChromeCookieManager
 
         conn.Open();
         using var reader = cmd.ExecuteReader();
-            
+
         while (reader.Read())
         {
             if (!data.Any(a => a.Name == reader.GetString(0)))
             {
                 var encryptedData = GetBytes(reader, 1);
-                AesGcm256.Prepare(encryptedData, out var nonce, out var ciphertextTag);
-                var value = AesGcm256.Decrypt(ciphertextTag, key, nonce);
+                AesGcm256.Prepare(
+                    encryptedData,
+                    out var nonce,
+                    out var ciphertextTag);
+                var value = AesGcm256.Decrypt(
+                    ciphertextTag,
+                    key,
+                    nonce);
 
                 data.Add(new Cookie(reader.GetString(0), value));
             }
         }
-            
+
         conn.Close();
 
         return data;
@@ -55,12 +62,15 @@ internal static class ChromeCookieManager
         long bytesRead;
         var fieldOffset = 0L;
         using MemoryStream stream = new();
-        while ((bytesRead = reader.GetBytes(columnIndex, fieldOffset, buffer, 0, buffer.Length)) > 0)
+        while ((bytesRead = ReadNext()) > 0)
         {
             stream.Write(buffer, 0, (int)bytesRead);
             fieldOffset += bytesRead;
         }
         return stream.ToArray();
+
+        long ReadNext() =>
+            reader.GetBytes(columnIndex, fieldOffset, buffer, 0, buffer.Length);
     }
 
     private class AesGcm256
@@ -77,22 +87,40 @@ internal static class ChromeCookieManager
             var src = Convert.FromBase64String(key);
             var encryptedKey = src.Skip(5).ToArray();
 
-            return ProtectedData.Unprotect(encryptedKey, null, DataProtectionScope.CurrentUser)!;
+            return ProtectedData.Unprotect(
+                encryptedKey,
+                null,
+                DataProtectionScope.CurrentUser)!;
         }
 
-        public static string Decrypt(byte[] encryptedBytes, byte[] key, byte[] iv)
+        public static string Decrypt(
+            byte[] encryptedBytes,
+            byte[] key,
+            byte[] iv)
         {
             try
             {
                 var cipher = new GcmBlockCipher(new AesEngine());
-                var parameters = new AeadParameters(new KeyParameter(key), 128, iv, null);
+                var parameters = new AeadParameters(
+                    new KeyParameter(key),
+                    128,
+                    iv,
+                    null);
 
                 cipher.Init(false, parameters);
-                var plainBytes = new byte[cipher.GetOutputSize(encryptedBytes.Length)];
-                var retLen = cipher.ProcessBytes(encryptedBytes, 0, encryptedBytes.Length, plainBytes, 0);
+                var plainBytes =
+                    new byte[cipher.GetOutputSize(encryptedBytes.Length)];
+                var retLen = cipher.ProcessBytes(
+                    encryptedBytes,
+                    0,
+                    encryptedBytes.Length,
+                    plainBytes,
+                    0);
                 cipher.DoFinal(plainBytes, retLen);
 
-                return Encoding.UTF8.GetString(plainBytes).TrimEnd("\r\n\0".ToCharArray());
+                return Encoding.UTF8
+                    .GetString(plainBytes)
+                    .TrimEnd("\r\n\0".ToCharArray());
             }
             catch (Exception ex)
             {
@@ -100,13 +128,26 @@ internal static class ChromeCookieManager
             }
         }
 
-        public static void Prepare(byte[] encryptedData, out byte[] nonce, out byte[] ciphertextTag)
+        public static void Prepare(
+            byte[] encryptedData,
+            out byte[] nonce,
+            out byte[] ciphertextTag)
         {
             nonce = new byte[12];
             ciphertextTag = new byte[encryptedData.Length - 3 - nonce.Length];
 
-            Array.Copy(encryptedData, 3, nonce, 0, nonce.Length);
-            Array.Copy(encryptedData, 3 + nonce.Length, ciphertextTag, 0, ciphertextTag.Length);
+            Array.Copy(
+                encryptedData,
+                3,
+                nonce,
+                0,
+                nonce.Length);
+            Array.Copy(
+                encryptedData,
+                3 + nonce.Length,
+                ciphertextTag,
+                0,
+                ciphertextTag.Length);
         }
     }
 }

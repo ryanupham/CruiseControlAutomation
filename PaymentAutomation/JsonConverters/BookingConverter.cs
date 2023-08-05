@@ -3,7 +3,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace PaymentAutomation.JsonConverters;
-
 internal class BookingConverter : JsonConverter<Booking>
 {
     public override Booking Read(

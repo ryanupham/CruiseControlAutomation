@@ -1,7 +1,6 @@
 ﻿using PaymentAutomation.Models;
 
 namespace PaymentAutomation.Services;
-
 public interface IAgentSettingsProvider
 {
     bool TryGet(string agentId, out AgentSettings settings);

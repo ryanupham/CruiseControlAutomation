@@ -1,5 +1,4 @@
 ﻿namespace CruiseControl.Models;
-
 public record EmailConfiguration
 {
     public string Server { get; init; } = string.Empty;

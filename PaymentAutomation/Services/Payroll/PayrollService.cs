@@ -4,7 +4,6 @@ using PaymentAutomation.Services.Payroll;
 using RazorLight;
 
 namespace PaymentAutomation.Services;
-
 public interface IPayrollService
 {
     Task GenerateReportsForWeekEnding(DateOnly weekEndingDate);
@@ -85,7 +84,7 @@ internal class PayrollService : IPayrollService
             }
         }
     }
-    
+
     private async Task<ReportMetadata> GenerateConsolidatedPayroll(
         DateOnly weekEndingDate,
         IReadOnlyCollection<Booking> bookings,
@@ -95,14 +94,14 @@ internal class PayrollService : IPayrollService
             "payrollAll.cshtml",
             (weekEndingDate, bookings, adjustments));
         var temporaryHtmlFile = Path.Combine(temporaryFolder, "tmp.html");
-        
+
         File.WriteAllText(temporaryHtmlFile, html);
 
         string filenamePrefix = GetFilenamePrefixForWeekEnding(weekEndingDate);
         var temporaryPdfFile = Path.Combine(
             temporaryFolder,
             $"{filenamePrefix}.pdf");
-        
+
         pdfService.PrintToPdf(temporaryHtmlFile, temporaryPdfFile);
         File.Delete(temporaryHtmlFile);
 
@@ -125,7 +124,7 @@ internal class PayrollService : IPayrollService
             "payrollAgent.cshtml",
             (weekEndingDate, agent, bookings, adjustments));
         var temporaryHtmlFile = Path.Combine(temporaryFolder, "tmp.html");
-        
+
         File.WriteAllText(temporaryHtmlFile, html);
 
         var formattedAgentName = agent.FullName.Replace(' ', '-');
@@ -133,7 +132,7 @@ internal class PayrollService : IPayrollService
         var filename = Path.Combine(
             temporaryFolder,
             $"{filenamePrefix}-{formattedAgentName}.pdf");
-        
+
         pdfService.PrintToPdf(temporaryHtmlFile, filename);
         File.Delete(temporaryHtmlFile);
 
